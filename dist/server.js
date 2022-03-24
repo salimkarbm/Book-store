@@ -40,8 +40,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 exports.__esModule = true;
 var express_1 = __importDefault(require("express"));
+var books_1 = __importDefault(require("./handlers/books"));
 var app = (0, express_1["default"])();
-var address = '0.0.0.0:3001';
+var address = '0.0.0.0:5000';
 app.use(express_1["default"].json());
 app.get('/', function (req, res) {
     return __awaiter(this, void 0, void 0, function () {
@@ -51,6 +52,7 @@ app.get('/', function (req, res) {
         });
     });
 });
-app.listen(3000, function () {
+(0, books_1["default"])(app);
+app.listen(5000, function () {
     console.log("starting app on: ".concat(address));
 });

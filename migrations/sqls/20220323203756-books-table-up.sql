@@ -1,0 +1,1 @@
+CREATE TABLE books (id serial primary key, title varchar(150), author varchar(255), total_pages integer, type varchar(100), summary text);

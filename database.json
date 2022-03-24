@@ -1,0 +1,16 @@
+{
+  "dev": {
+    "driver": "pg",
+    "host": "127.0.0.1",
+    "database": "books_dev",
+    "user": "karbm",
+    "password": "karbm"
+  },
+  "test": {
+    "driver": "pg",
+    "host": "127.0.0.1",
+    "database": "book_tests",
+    "user": "karbm",
+    "password": "karbm"
+  }
+}
