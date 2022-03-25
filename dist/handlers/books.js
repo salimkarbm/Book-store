@@ -38,27 +38,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var books_1 = require("../models/books");
 var store = new books_1.BookStore();
-var index = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var books, err_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, store.index()];
-            case 1:
-                books = _a.sent();
-                res.json(books);
-                return [3 /*break*/, 3];
-            case 2:
-                err_1 = _a.sent();
-                res.status(404).json({ error: err_1 });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
-        }
-    });
-}); };
 var create = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var book, books, err_2;
+    var book, books, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -73,11 +54,30 @@ var create = function (req, res) { return __awaiter(void 0, void 0, void 0, func
                 return [4 /*yield*/, store.create(book)];
             case 1:
                 books = _a.sent();
-                res.json(books);
+                res.status(201).json(books);
+                return [3 /*break*/, 3];
+            case 2:
+                err_1 = _a.sent();
+                res.status(400).json({ error: err_1 });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+var index = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var books, err_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, store.index()];
+            case 1:
+                books = _a.sent();
+                res.status(200).json(books);
                 return [3 /*break*/, 3];
             case 2:
                 err_2 = _a.sent();
-                res.status(404).json({ error: err_2 });
+                res.status(400).json({ err: err_2 });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
@@ -92,11 +92,11 @@ var show = function (req, res) { return __awaiter(void 0, void 0, void 0, functi
                 return [4 /*yield*/, store.show(req.params.id)];
             case 1:
                 book = _a.sent();
-                res.json(book);
+                res.status(200).json(book);
                 return [3 /*break*/, 3];
             case 2:
                 err_3 = _a.sent();
-                res.status(404).json({ error: err_3 });
+                res.status(400).json({ error: err_3 });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
@@ -117,10 +117,10 @@ var update = function (req, res) { return __awaiter(void 0, void 0, void 0, func
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, store.update(req.params.id, req.body.title, req.body.author, req.body.type, req.body.totalPages, req.body.summary)];
+                return [4 /*yield*/, store.update(req.params.id, req.body.title, req.body.author, req.body.totalPages, req.body.type, req.body.summary)];
             case 2:
                 updatedBooks = _a.sent();
-                res.json(updatedBooks);
+                res.status(200).json(updatedBooks);
                 return [3 /*break*/, 4];
             case 3:
                 err_4 = _a.sent();
@@ -139,21 +139,23 @@ var destroy = function (req, res) { return __awaiter(void 0, void 0, void 0, fun
                 return [4 /*yield*/, store["delete"](req.params.id)];
             case 1:
                 deletedBook = _a.sent();
-                res.json(deletedBook);
+                res
+                    .status(204)
+                    .json({ status: 'success', message: 'Book deleted successfully' });
                 return [3 /*break*/, 3];
             case 2:
                 err_5 = _a.sent();
-                res.status(404).json({ error: err_5 });
+                res.status(400).json({ error: err_5 });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
     });
 }); };
 var bookRoutes = function (app) {
-    app.get('/api/books', index);
     app.post('/api/books', create);
-    app.get('/api/books:', show);
-    app.put('/api/books:id', update);
-    app["delete"]('/api/books:id', destroy);
+    app.get('/api/books', index);
+    app.get('/api/books/:id', show);
+    app.put('/api/books/:id', update);
+    app["delete"]('/api/books/:id', destroy);
 };
 exports["default"] = bookRoutes;

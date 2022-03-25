@@ -9,7 +9,7 @@
   "test": {
     "driver": "pg",
     "host": "127.0.0.1",
-    "database": "book_tests",
+    "database": "books_test",
     "user": "karbm",
     "password": "karbm"
   }

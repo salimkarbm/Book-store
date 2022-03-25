@@ -44,26 +44,56 @@ var database_1 = __importDefault(require("../database"));
 var BookStore = /** @class */ (function () {
     function BookStore() {
     }
-    BookStore.prototype.index = function () {
+    BookStore.prototype.create = function (book) {
         return __awaiter(this, void 0, void 0, function () {
-            var sql, conn, result, err_1;
+            var sql, values, conn, result, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, , 4]);
-                        sql = 'SELECT * FROM books';
-                        console.log('KKK');
+                        sql = 'INSERT INTO books (title, author, total_pages, type, summary) VALUES($1,$2,$3,$4,$5) RETURNING *';
+                        values = [
+                            book.title,
+                            book.author,
+                            book.totalPages,
+                            book.type,
+                            book.summary,
+                        ];
                         return [4 /*yield*/, database_1["default"].connect()];
                     case 1:
                         conn = _a.sent();
+                        return [4 /*yield*/, conn.query(sql, values)];
+                    case 2:
+                        result = _a.sent();
+                        conn.release();
+                        return [2 /*return*/, result.rows[0]];
+                    case 3:
+                        err_1 = _a.sent();
+                        throw new Error("could not create book ".concat(err_1));
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    BookStore.prototype.index = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var conn, sql, result, err_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        return [4 /*yield*/, database_1["default"].connect()];
+                    case 1:
+                        conn = _a.sent();
+                        sql = 'SELECT * FROM books';
                         return [4 /*yield*/, conn.query(sql)];
                     case 2:
                         result = _a.sent();
                         conn.release();
                         return [2 /*return*/, result.rows];
                     case 3:
-                        err_1 = _a.sent();
-                        throw new Error("could not fetch books from database ".concat(err_1));
+                        err_2 = _a.sent();
+                        throw new Error("could not fetch books from database ".concat(err_2));
                     case 4: return [2 /*return*/];
                 }
             });
@@ -71,7 +101,7 @@ var BookStore = /** @class */ (function () {
     };
     BookStore.prototype.show = function (id) {
         return __awaiter(this, void 0, void 0, function () {
-            var sql, conn, result, book, err_2;
+            var sql, conn, result, book, err_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -83,44 +113,12 @@ var BookStore = /** @class */ (function () {
                         return [4 /*yield*/, conn.query(sql, [id])];
                     case 2:
                         result = _a.sent();
-                        console.log(result);
                         book = result.rows[0];
                         conn.release();
                         return [2 /*return*/, book];
                     case 3:
-                        err_2 = _a.sent();
-                        throw new Error("could not find book with id ".concat(id, ". Error: ").concat(err_2));
-                    case 4: return [2 /*return*/];
-                }
-            });
-        });
-    };
-    BookStore.prototype.create = function (book) {
-        return __awaiter(this, void 0, void 0, function () {
-            var text, values, conn, result, err_3;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 3, , 4]);
-                        text = 'INSERT INTO books (title, author, total_pages, type, summary) VALUES($1,$2,$3,$4,$5) RETURNING *';
-                        values = [
-                            book.title,
-                            book.totalPages,
-                            book.author,
-                            book.type,
-                            book.summary,
-                        ];
-                        return [4 /*yield*/, database_1["default"].connect()];
-                    case 1:
-                        conn = _a.sent();
-                        return [4 /*yield*/, conn.query(text, values)];
-                    case 2:
-                        result = _a.sent();
-                        conn.release();
-                        return [2 /*return*/, result.rows[0]];
-                    case 3:
                         err_3 = _a.sent();
-                        throw new Error("could not create book ".concat(err_3));
+                        throw new Error("could not find book with id ".concat(id, ". Error: ").concat(err_3));
                     case 4: return [2 /*return*/];
                 }
             });
@@ -138,6 +136,7 @@ var BookStore = /** @class */ (function () {
                     case 1:
                         conn = _a.sent();
                         return [4 /*yield*/, conn.query(sql, [
+                                id,
                                 title,
                                 author,
                                 totalPages,
