@@ -35,26 +35,37 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 exports.__esModule = true;
-var express_1 = __importDefault(require("express"));
-var books_1 = __importDefault(require("./handlers/books"));
-var users_1 = __importDefault(require("./handlers/users"));
-var app = (0, express_1["default"])();
-var address = '0.0.0.0:5000';
-app.use(express_1["default"].json());
-app.get('/', function (req, res) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            res.send('hello world');
-            return [2 /*return*/];
-        });
+var users_1 = require("../models/users");
+var store = new users_1.userStore();
+var create = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var user, users, err_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                user = {
+                    username: req.body.username,
+                    password: req.body.password
+                };
+                return [4 /*yield*/, store.create(user)];
+            case 1:
+                users = _a.sent();
+                res.status(201).json(users);
+                return [3 /*break*/, 3];
+            case 2:
+                err_1 = _a.sent();
+                res.status(400).json({ error: err_1 });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
     });
-});
-(0, books_1["default"])(app);
-(0, users_1["default"])(app);
-app.listen(5000, function () {
-    console.log("starting app on: ".concat(address));
-});
+}); };
+var userRoutes = function (app) {
+    app.post('/api/users', create);
+    // app.get('/api/books', index)
+    // app.get('/api/books/:id', show)
+    // app.put('/api/books/:id', update)
+    // app.delete('/api/books/:id', destroy)
+};
+exports["default"] = userRoutes;

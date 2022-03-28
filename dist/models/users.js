@@ -39,22 +39,46 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 exports.__esModule = true;
-var express_1 = __importDefault(require("express"));
-var books_1 = __importDefault(require("./handlers/books"));
-var users_1 = __importDefault(require("./handlers/users"));
-var app = (0, express_1["default"])();
-var address = '0.0.0.0:5000';
-app.use(express_1["default"].json());
-app.get('/', function (req, res) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            res.send('hello world');
-            return [2 /*return*/];
-        });
-    });
-});
-(0, books_1["default"])(app);
-(0, users_1["default"])(app);
-app.listen(5000, function () {
-    console.log("starting app on: ".concat(address));
-});
+exports.userStore = void 0;
+var bcrypt_1 = __importDefault(require("bcrypt"));
+var database_1 = __importDefault(require("../database"));
+var userStore = /** @class */ (function () {
+    function userStore() {
+        var _this = this;
+        this.create = function (user) { return __awaiter(_this, void 0, void 0, function () {
+            var newUser, saltRound, pepper, conn, sql, hash, result, err_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        newUser = {
+                            username: user.username,
+                            password: user.password
+                        };
+                        saltRound = parseInt(process.env.SALT_ROUNDS, 10);
+                        pepper = process.env.BCRYPT_PASSWORD;
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 5, , 6]);
+                        return [4 /*yield*/, database_1["default"].connect()];
+                    case 2:
+                        conn = _a.sent();
+                        sql = 'INSERT INTO users (username, password_digest) VALUES($1, $2) RETURNING * ';
+                        return [4 /*yield*/, bcrypt_1["default"].hash(newUser.password + pepper, saltRound)];
+                    case 3:
+                        hash = _a.sent();
+                        return [4 /*yield*/, conn.query(sql, [newUser.username, hash])];
+                    case 4:
+                        result = _a.sent();
+                        conn.release();
+                        return [2 /*return*/, result.rows[0]];
+                    case 5:
+                        err_1 = _a.sent();
+                        throw new Error("Unable to create user ".concat(user.username, " Error ").concat(err_1));
+                    case 6: return [2 /*return*/];
+                }
+            });
+        }); };
+    }
+    return userStore;
+}());
+exports.userStore = userStore;

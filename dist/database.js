@@ -10,7 +10,6 @@ var _a = process.env, POSTGRES_HOST = _a.POSTGRES_HOST, POSTGRES_DB = _a.POSTGRE
 var connectionString = "postgresql://".concat(POSTGRES_USER, ":").concat(POSTGRES_PASSWORD, "@").concat(POSTGRES_HOST, ":").concat(POSTGRES_PORT, "/").concat(POSTGRES_DB);
 var client;
 if (NODE_ENV === 'test') {
-    console.log('test mode');
     client = new pg_1.Pool({
         host: POSTGRES_HOST,
         user: POSTGRES_USER,
@@ -19,7 +18,6 @@ if (NODE_ENV === 'test') {
     });
 }
 else {
-    console.log('dev mode');
     client = new pg_1.Pool({ connectionString: connectionString });
 }
 exports["default"] = client;

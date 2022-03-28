@@ -18,7 +18,6 @@ const connectionString = `postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${P
 let client: Pool
 
 if (NODE_ENV === 'test') {
-  console.log('test mode')
   client = new Pool({
     host: POSTGRES_HOST,
     user: POSTGRES_USER,
@@ -26,7 +25,6 @@ if (NODE_ENV === 'test') {
     password: POSTGRES_PASSWORD,
   })
 } else {
-  console.log('dev mode')
   client = new Pool({ connectionString })
 }
 export default client
