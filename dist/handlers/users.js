@@ -35,52 +35,66 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 exports.__esModule = true;
+var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var users_1 = require("../models/users");
 var store = new users_1.userStore();
+var secret = process.env.TOKEN_SECRET;
 var create = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var user, users, err_1;
+    var user, newUser, token, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
                 user = {
                     username: req.body.username,
                     password: req.body.password
                 };
-                return [4 /*yield*/, store.create(user)];
+                _a.label = 1;
             case 1:
-                users = _a.sent();
-                res.status(201).json(users);
-                return [3 /*break*/, 3];
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, store.create(user)];
             case 2:
+                newUser = _a.sent();
+                token = jsonwebtoken_1["default"].sign({ userId: newUser.id }, secret);
+                res.status(201).json({ token: token });
+                return [3 /*break*/, 4];
+            case 3:
                 err_1 = _a.sent();
                 res.status(400).json({ error: err_1 });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); };
 var authenticate = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var user, result, err_2;
+    var user, authenticateUser, token, err_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
                 user = {
                     username: req.body.username,
                     password: req.body.password
                 };
-                return [4 /*yield*/, store.authenticate(user.username, user.password)];
+                _a.label = 1;
             case 1:
-                result = _a.sent();
-                res.status(200).json(result);
-                return [3 /*break*/, 3];
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, store.authenticate(user.username, user.password)];
             case 2:
+                authenticateUser = _a.sent();
+                if (authenticateUser === null) {
+                    return [2 /*return*/, res.status(401).json({ message: 'incorrect username or password' })];
+                }
+                token = jsonwebtoken_1["default"].sign({ userId: authenticateUser.username }, secret);
+                res.status(200).json(token);
+                return [3 /*break*/, 4];
+            case 3:
                 err_2 = _a.sent();
                 res.status(400).json({ error: err_2 });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); };

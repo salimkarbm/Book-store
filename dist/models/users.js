@@ -90,18 +90,18 @@ var userStore = /** @class */ (function () {
                         return [4 /*yield*/, database_1["default"].connect()];
                     case 1:
                         conn = _a.sent();
-                        sql = 'SELECT password_digest FROM users where username = ($1)';
+                        sql = 'SELECT username, password_digest FROM users WHERE username = ($1)';
                         return [4 /*yield*/, conn.query(sql, [username])];
                     case 2:
                         result = _a.sent();
-                        if (!result.rows.length) return [3 /*break*/, 4];
+                        if (!(result.rows.length > 0)) return [3 /*break*/, 4];
                         user = result.rows[0];
                         return [4 /*yield*/, bcrypt_1["default"].compare(password + pepper, user.password_digest)];
                     case 3:
-                        if (!(_a.sent())) {
-                            return [2 /*return*/, null];
+                        if (_a.sent()) {
+                            return [2 /*return*/, user];
                         }
-                        return [2 /*return*/, user];
+                        _a.label = 4;
                     case 4: return [2 /*return*/, null];
                     case 5:
                         err_2 = _a.sent();

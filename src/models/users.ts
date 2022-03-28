@@ -2,12 +2,13 @@ import bcrypt from 'bcrypt'
 import client from '../database'
 
 export interface User {
+  id?: number
   username: string
   password: string
 }
 const pepper = process.env.BCRYPT_PASSWORD
 export class userStore {
-  async create(user: User): Promise<User[]> {
+  async create(user: User): Promise<User> {
     const newUser = {
       username: user.username,
       password: user.password,
@@ -30,14 +31,14 @@ export class userStore {
   async authenticate(username: string, password: string): Promise<User | null> {
     try {
       const conn = await client.connect()
-      const sql = 'SELECT password_digest FROM users where username = ($1)'
+      const sql =
+        'SELECT username, password_digest FROM users WHERE username = ($1)'
       const result = await conn.query(sql, [username])
-      if (result.rows.length) {
+      if (result.rows.length > 0) {
         const user = result.rows[0]
-        if (!(await bcrypt.compare(password + pepper, user.password_digest))) {
-          return null
+        if (await bcrypt.compare(password + pepper, user.password_digest)) {
+          return user
         }
-        return user
       }
       return null
     } catch (err) {
