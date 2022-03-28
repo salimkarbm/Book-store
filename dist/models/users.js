@@ -42,11 +42,13 @@ exports.__esModule = true;
 exports.userStore = void 0;
 var bcrypt_1 = __importDefault(require("bcrypt"));
 var database_1 = __importDefault(require("../database"));
+var pepper = process.env.BCRYPT_PASSWORD;
 var userStore = /** @class */ (function () {
     function userStore() {
-        var _this = this;
-        this.create = function (user) { return __awaiter(_this, void 0, void 0, function () {
-            var newUser, saltRound, pepper, conn, sql, hash, result, err_1;
+    }
+    userStore.prototype.create = function (user) {
+        return __awaiter(this, void 0, void 0, function () {
+            var newUser, saltRound, conn, sql, hash, result, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -55,7 +57,6 @@ var userStore = /** @class */ (function () {
                             password: user.password
                         };
                         saltRound = parseInt(process.env.SALT_ROUNDS, 10);
-                        pepper = process.env.BCRYPT_PASSWORD;
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 5, , 6]);
@@ -73,12 +74,43 @@ var userStore = /** @class */ (function () {
                         return [2 /*return*/, result.rows[0]];
                     case 5:
                         err_1 = _a.sent();
-                        throw new Error("Unable to create user ".concat(user.username, " Error ").concat(err_1));
+                        throw new Error("Unable to create user ".concat(newUser.username, " Error ").concat(err_1));
                     case 6: return [2 /*return*/];
                 }
             });
-        }); };
-    }
+        });
+    };
+    userStore.prototype.authenticate = function (username, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            var conn, sql, result, user, err_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 5, , 6]);
+                        return [4 /*yield*/, database_1["default"].connect()];
+                    case 1:
+                        conn = _a.sent();
+                        sql = 'SELECT password_digest FROM users where username = ($1)';
+                        return [4 /*yield*/, conn.query(sql, [username])];
+                    case 2:
+                        result = _a.sent();
+                        if (!result.rows.length) return [3 /*break*/, 4];
+                        user = result.rows[0];
+                        return [4 /*yield*/, bcrypt_1["default"].compare(password + pepper, user.password_digest)];
+                    case 3:
+                        if (!(_a.sent())) {
+                            return [2 /*return*/, null];
+                        }
+                        return [2 /*return*/, user];
+                    case 4: return [2 /*return*/, null];
+                    case 5:
+                        err_2 = _a.sent();
+                        throw new Error("Unable to authenticate user ".concat(err_2));
+                    case 6: return [2 /*return*/];
+                }
+            });
+        });
+    };
     return userStore;
 }());
 exports.userStore = userStore;

@@ -15,13 +15,22 @@ const create = async (req: Request, res: Response) => {
     res.status(400).json({ error: err })
   }
 }
+const authenticate = async (req: Request, res: Response) => {
+  try {
+    const user: User = {
+      username: req.body.username,
+      password: req.body.password,
+    }
+    const result = await store.authenticate(user.username, user.password)
+    res.status(200).json(result)
+  } catch (err) {
+    res.status(400).json({ error: err })
+  }
+}
 
 const userRoutes = (app: express.Application) => {
   app.post('/api/users', create)
-  // app.get('/api/books', index)
-  // app.get('/api/books/:id', show)
-  // app.put('/api/books/:id', update)
-  // app.delete('/api/books/:id', destroy)
+  app.post('/api/login', authenticate)
 }
 
 export default userRoutes

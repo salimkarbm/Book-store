@@ -61,11 +61,31 @@ var create = function (req, res) { return __awaiter(void 0, void 0, void 0, func
         }
     });
 }); };
+var authenticate = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var user, result, err_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                user = {
+                    username: req.body.username,
+                    password: req.body.password
+                };
+                return [4 /*yield*/, store.authenticate(user.username, user.password)];
+            case 1:
+                result = _a.sent();
+                res.status(200).json(result);
+                return [3 /*break*/, 3];
+            case 2:
+                err_2 = _a.sent();
+                res.status(400).json({ error: err_2 });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
 var userRoutes = function (app) {
     app.post('/api/users', create);
-    // app.get('/api/books', index)
-    // app.get('/api/books/:id', show)
-    // app.put('/api/books/:id', update)
-    // app.delete('/api/books/:id', destroy)
+    app.post('/api/login', authenticate);
 };
 exports["default"] = userRoutes;
