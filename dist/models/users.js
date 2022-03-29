@@ -80,9 +80,58 @@ var userStore = /** @class */ (function () {
             });
         });
     };
+    userStore.prototype.index = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var conn, sql, result, err_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        return [4 /*yield*/, database_1["default"].connect()];
+                    case 1:
+                        conn = _a.sent();
+                        sql = 'SELECT * FROM users';
+                        return [4 /*yield*/, conn.query(sql)];
+                    case 2:
+                        result = _a.sent();
+                        conn.release();
+                        return [2 /*return*/, result.rows];
+                    case 3:
+                        err_2 = _a.sent();
+                        throw new Error("could not fetch users from database ".concat(err_2));
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    userStore.prototype.show = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sql, conn, result, book, err_3;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        sql = 'SELECT * FROM users WHERE id=($1)';
+                        return [4 /*yield*/, database_1["default"].connect()];
+                    case 1:
+                        conn = _a.sent();
+                        return [4 /*yield*/, conn.query(sql, [id])];
+                    case 2:
+                        result = _a.sent();
+                        book = result.rows[0];
+                        conn.release();
+                        return [2 /*return*/, book];
+                    case 3:
+                        err_3 = _a.sent();
+                        throw new Error("could not find user with id ".concat(id, ". Error: ").concat(err_3));
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
     userStore.prototype.authenticate = function (username, password) {
         return __awaiter(this, void 0, void 0, function () {
-            var conn, sql, result, user, err_2;
+            var conn, sql, result, user, err_4;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -104,8 +153,8 @@ var userStore = /** @class */ (function () {
                         _a.label = 4;
                     case 4: return [2 /*return*/, null];
                     case 5:
-                        err_2 = _a.sent();
-                        throw new Error("Unable to authenticate user ".concat(err_2));
+                        err_4 = _a.sent();
+                        throw new Error("Unable to authenticate user ".concat(err_4));
                     case 6: return [2 /*return*/];
                 }
             });

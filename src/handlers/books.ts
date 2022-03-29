@@ -1,17 +1,25 @@
 import express, { Request, Response } from 'express'
+import jwt from 'jsonwebtoken'
 import { Books, BookStore } from '../models/books'
-
+import { verifyAuthToken } from '../handlers/users'
 const store = new BookStore()
 
 const create = async (req: Request, res: Response) => {
+  const book: Books = {
+    title: req.body.title,
+    author: req.body.author,
+    type: req.body.type,
+    totalPages: req.body.totalPages,
+    summary: req.body.summary,
+  }
+  const secret = process.env.TOKEN_SECRET as string
   try {
-    const book: Books = {
-      title: req.body.title,
-      author: req.body.author,
-      type: req.body.type,
-      totalPages: req.body.totalPages,
-      summary: req.body.summary,
-    }
+    jwt.verify(req.body.token, secret)
+  } catch (err) {
+    return res.status(401).json(`Invalid token ${err}`)
+  }
+
+  try {
     const books = await store.create(book)
     res.status(201).json(books)
   } catch (err) {
@@ -71,11 +79,11 @@ const destroy = async (req: Request, res: Response) => {
 }
 
 const bookRoutes = (app: express.Application) => {
-  app.post('/api/books', create)
+  app.post('/api/books', verifyAuthToken, create)
   app.get('/api/books', index)
   app.get('/api/books/:id', show)
-  app.put('/api/books/:id', update)
-  app.delete('/api/books/:id', destroy)
+  app.put('/api/books/:id', verifyAuthToken, update)
+  app.delete('/api/books/:id', verifyAuthToken, destroy)
 }
 
 export default bookRoutes

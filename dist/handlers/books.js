@@ -35,15 +35,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 exports.__esModule = true;
+var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var books_1 = require("../models/books");
+var users_1 = require("../handlers/users");
 var store = new books_1.BookStore();
 var create = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var book, books, err_1;
+    var book, secret, books, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
                 book = {
                     title: req.body.title,
                     author: req.body.author,
@@ -51,16 +55,26 @@ var create = function (req, res) { return __awaiter(void 0, void 0, void 0, func
                     totalPages: req.body.totalPages,
                     summary: req.body.summary
                 };
-                return [4 /*yield*/, store.create(book)];
+                secret = process.env.TOKEN_SECRET;
+                try {
+                    jsonwebtoken_1["default"].verify(req.body.token, secret);
+                }
+                catch (err) {
+                    return [2 /*return*/, res.status(401).json("Invalid token ".concat(err))];
+                }
+                _a.label = 1;
             case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, store.create(book)];
+            case 2:
                 books = _a.sent();
                 res.status(201).json(books);
-                return [3 /*break*/, 3];
-            case 2:
+                return [3 /*break*/, 4];
+            case 3:
                 err_1 = _a.sent();
                 res.status(400).json({ error: err_1 });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); };
@@ -152,10 +166,10 @@ var destroy = function (req, res) { return __awaiter(void 0, void 0, void 0, fun
     });
 }); };
 var bookRoutes = function (app) {
-    app.post('/api/books', create);
+    app.post('/api/books', users_1.verifyAuthToken, create);
     app.get('/api/books', index);
     app.get('/api/books/:id', show);
-    app.put('/api/books/:id', update);
-    app["delete"]('/api/books/:id', destroy);
+    app.put('/api/books/:id', users_1.verifyAuthToken, update);
+    app["delete"]('/api/books/:id', users_1.verifyAuthToken, destroy);
 };
 exports["default"] = bookRoutes;

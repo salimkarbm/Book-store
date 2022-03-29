@@ -27,6 +27,30 @@ export class userStore {
       throw new Error(`Unable to create user ${newUser.username} Error ${err}`)
     }
   }
+  async index(): Promise<User[]> {
+    try {
+      const conn = await client.connect()
+      const sql = 'SELECT * FROM users'
+      const result = await conn.query(sql)
+      conn.release()
+      return result.rows
+    } catch (err) {
+      throw new Error(`could not fetch users from database ${err}`)
+    }
+  }
+
+  async show(id: string): Promise<User[]> {
+    try {
+      const sql = 'SELECT * FROM users WHERE id=($1)'
+      const conn = await client.connect()
+      const result = await conn.query(sql, [id])
+      const book = result.rows[0]
+      conn.release()
+      return book
+    } catch (err) {
+      throw new Error(`could not find user with id ${id}. Error: ${err}`)
+    }
+  }
 
   async authenticate(username: string, password: string): Promise<User | null> {
     try {
