@@ -111,11 +111,11 @@ var userStore = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, , 4]);
-                        sql = 'SELECT * FROM users WHERE id=($1)';
+                        sql = "SELECT * FROM users WHERE id=".concat(id);
                         return [4 /*yield*/, database_1["default"].connect()];
                     case 1:
                         conn = _a.sent();
-                        return [4 /*yield*/, conn.query(sql, [id])];
+                        return [4 /*yield*/, conn.query(sql)];
                     case 2:
                         result = _a.sent();
                         book = result.rows[0];
@@ -129,9 +129,86 @@ var userStore = /** @class */ (function () {
             });
         });
     };
+    userStore.prototype.update = function (id, username, role) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sql, conn, result, book, err_4;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        sql = "UPDATE users SET username=($1),roles=($2) WHERE id=".concat(id, " RETURNING *");
+                        return [4 /*yield*/, database_1["default"].connect()];
+                    case 1:
+                        conn = _a.sent();
+                        return [4 /*yield*/, conn.query(sql, [username, role])];
+                    case 2:
+                        result = _a.sent();
+                        book = result.rows[0];
+                        conn.release();
+                        return [2 /*return*/, book];
+                    case 3:
+                        err_4 = _a.sent();
+                        console.error(err_4);
+                        throw new Error("could not update user ".concat(username, ", Error: ").concat(err_4));
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    userStore.prototype.updateMe = function (id, username) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sql, conn, result, book, err_5;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        sql = "UPDATE users SET username=($1) WHERE id=".concat(id, " RETURNING *");
+                        return [4 /*yield*/, database_1["default"].connect()];
+                    case 1:
+                        conn = _a.sent();
+                        return [4 /*yield*/, conn.query(sql, [username])];
+                    case 2:
+                        result = _a.sent();
+                        book = result.rows[0];
+                        conn.release();
+                        return [2 /*return*/, book];
+                    case 3:
+                        err_5 = _a.sent();
+                        console.error(err_5);
+                        throw new Error("could not update user ".concat(username, ", Error: ").concat(err_5));
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    userStore.prototype["delete"] = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sql, conn, result, book, err_6;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        sql = "DELETE FROM users WHERE id=".concat(id, " RETURNING *");
+                        return [4 /*yield*/, database_1["default"].connect()];
+                    case 1:
+                        conn = _a.sent();
+                        return [4 /*yield*/, conn.query(sql)];
+                    case 2:
+                        result = _a.sent();
+                        book = result.rows[0];
+                        conn.release();
+                        return [2 /*return*/, book];
+                    case 3:
+                        err_6 = _a.sent();
+                        throw new Error("Unable to delete user with ".concat(id, ", Error: ").concat(err_6));
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
     userStore.prototype.authenticate = function (username, password) {
         return __awaiter(this, void 0, void 0, function () {
-            var conn, sql, result, user, err_4;
+            var conn, sql, result, user, err_7;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -139,7 +216,7 @@ var userStore = /** @class */ (function () {
                         return [4 /*yield*/, database_1["default"].connect()];
                     case 1:
                         conn = _a.sent();
-                        sql = 'SELECT username, password_digest FROM users WHERE username = ($1)';
+                        sql = 'SELECT id, password_digest FROM users WHERE username = ($1)';
                         return [4 /*yield*/, conn.query(sql, [username])];
                     case 2:
                         result = _a.sent();
@@ -153,8 +230,8 @@ var userStore = /** @class */ (function () {
                         _a.label = 4;
                     case 4: return [2 /*return*/, null];
                     case 5:
-                        err_4 = _a.sent();
-                        throw new Error("Unable to authenticate user ".concat(err_4));
+                        err_7 = _a.sent();
+                        throw new Error("Unable to authenticate user ".concat(err_7));
                     case 6: return [2 /*return*/];
                 }
             });

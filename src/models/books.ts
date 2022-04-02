@@ -1,7 +1,7 @@
 import client from '../database'
 
 export interface Books {
-  id?: number
+  id?: string
   title: string
   totalPages: number
   author: string
@@ -44,9 +44,9 @@ export class BookStore {
 
   async show(id: string): Promise<Books[]> {
     try {
-      const sql = 'SELECT * FROM books WHERE id=($1)'
+      const sql = `SELECT * FROM books WHERE id=${id}`
       const conn = await client.connect()
-      const result = await conn.query(sql, [id])
+      const result = await conn.query(sql)
       const book = result.rows[0]
       conn.release()
       return book
@@ -62,19 +62,12 @@ export class BookStore {
     totalPages: number,
     type: string,
     summary: string
-  ): Promise<Books[]> {
+  ): Promise<Books> {
     try {
-      const sql =
-        'UPDATE books SET title=($2),author=($3),total_pages=($4),type=($5),summary=($6) WHERE id=($1) RETURNING *'
+      const sql = `UPDATE books SET title = ($1), author = ($2),total_pages = ($3),type = ($4), summary = ($5) WHERE id=${id} RETURNING *`
+      const values = [title, author, totalPages, type, summary]
       const conn = await client.connect()
-      const result = await conn.query(sql, [
-        id,
-        title,
-        author,
-        totalPages,
-        type,
-        summary,
-      ])
+      const result = await conn.query(sql, values)
       const book = result.rows[0]
       conn.release()
       return book
@@ -83,11 +76,11 @@ export class BookStore {
     }
   }
 
-  async delete(id: string): Promise<Books[]> {
+  async delete(id: string): Promise<Books> {
     try {
-      const sql = 'DELETE FROM books WHERE id=($1) RETURNING *'
+      const sql = `DELETE FROM books WHERE id=${id} RETURNING *`
       const conn = await client.connect()
-      const result = await conn.query(sql, [id])
+      const result = await conn.query(sql)
       const book = result.rows[0]
       conn.release()
       return book

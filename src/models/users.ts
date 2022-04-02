@@ -5,6 +5,7 @@ export interface User {
   id?: number
   username: string
   password: string
+  role?: string
 }
 const pepper = process.env.BCRYPT_PASSWORD
 export class userStore {
@@ -39,11 +40,11 @@ export class userStore {
     }
   }
 
-  async show(id: string): Promise<User[]> {
+  async show(id: string): Promise<User> {
     try {
-      const sql = 'SELECT * FROM users WHERE id=($1)'
+      const sql = `SELECT * FROM users WHERE id=${id}`
       const conn = await client.connect()
-      const result = await conn.query(sql, [id])
+      const result = await conn.query(sql)
       const book = result.rows[0]
       conn.release()
       return book
@@ -52,11 +53,48 @@ export class userStore {
     }
   }
 
+  async update(id: string, username: string, role: string): Promise<User> {
+    try {
+      const sql = `UPDATE users SET username=($1),roles=($2) WHERE id=${id} RETURNING *`
+      const conn = await client.connect()
+      const result = await conn.query(sql, [username, role])
+      const book = result.rows[0]
+      conn.release()
+      return book
+    } catch (err) {
+      console.error(err)
+      throw new Error(`could not update user ${username}, Error: ${err}`)
+    }
+  }
+  async updateMe(id: string, username: string): Promise<User> {
+    try {
+      const sql = `UPDATE users SET username=($1) WHERE id=${id} RETURNING *`
+      const conn = await client.connect()
+      const result = await conn.query(sql, [username])
+      const book = result.rows[0]
+      conn.release()
+      return book
+    } catch (err) {
+      console.error(err)
+      throw new Error(`could not update user ${username}, Error: ${err}`)
+    }
+  }
+  async delete(id: string): Promise<User> {
+    try {
+      const sql = `DELETE FROM users WHERE id=${id} RETURNING *`
+      const conn = await client.connect()
+      const result = await conn.query(sql)
+      const book = result.rows[0]
+      conn.release()
+      return book
+    } catch (err) {
+      throw new Error(`Unable to delete user with ${id}, Error: ${err}`)
+    }
+  }
   async authenticate(username: string, password: string): Promise<User | null> {
     try {
       const conn = await client.connect()
-      const sql =
-        'SELECT username, password_digest FROM users WHERE username = ($1)'
+      const sql = 'SELECT id, password_digest FROM users WHERE username = ($1)'
       const result = await conn.query(sql, [username])
       if (result.rows.length > 0) {
         const user = result.rows[0]

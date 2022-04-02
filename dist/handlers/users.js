@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 exports.__esModule = true;
-exports.verifyAuthToken = void 0;
+exports.roleAuthentication = exports.verifyAuthToken = void 0;
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var users_1 = require("../models/users");
 var store = new users_1.userStore();
@@ -108,8 +108,65 @@ var show = function (req, res) { return __awaiter(void 0, void 0, void 0, functi
         }
     });
 }); };
+var update = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var updatedUsers, err_4;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, store.update(req.params.id, req.body.username, req.body.role)];
+            case 1:
+                updatedUsers = _a.sent();
+                res.status(200).json(updatedUsers);
+                return [3 /*break*/, 3];
+            case 2:
+                err_4 = _a.sent();
+                res.status(404).json({ error: err_4 });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+var updateMe = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var updateUser, err_5;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, store.updateMe(req.params.id, req.body.username)];
+            case 1:
+                updateUser = _a.sent();
+                res.status(200).json(updateUser);
+                return [3 /*break*/, 3];
+            case 2:
+                err_5 = _a.sent();
+                res.status(404).json({ error: err_5 });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+var destroy = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var deletedBook, err_6;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, store["delete"](req.params.id)];
+            case 1:
+                deletedBook = _a.sent();
+                res.status(204);
+                return [3 /*break*/, 3];
+            case 2:
+                err_6 = _a.sent();
+                res.status(400).json({ error: err_6 });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
 var authenticate = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var user, authenticateUser, token, err_4;
+    var user, authenticateUser, token, err_7;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -126,42 +183,75 @@ var authenticate = function (req, res) { return __awaiter(void 0, void 0, void 0
                 if (authenticateUser === null) {
                     return [2 /*return*/, res.status(401).json({ message: 'incorrect username or password' })];
                 }
-                token = jsonwebtoken_1["default"].sign({ userId: authenticateUser.username }, secret);
+                token = jsonwebtoken_1["default"].sign({ userId: authenticateUser.id }, secret);
                 res.status(200).json(token);
                 return [3 /*break*/, 4];
             case 3:
-                err_4 = _a.sent();
-                res.status(400).json({ error: err_4 });
+                err_7 = _a.sent();
+                res.status(400).json({ error: err_7 });
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
         }
     });
 }); };
-var verifyAuthToken = function (req, res, next) {
-    try {
-        var token = void 0;
-        if (req.headers.authorization &&
-            req.headers.authorization.startsWith('Bearer')) {
-            token = req.headers.authorization.split(' ')[1];
+var verifyAuthToken = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var token, decoded, currentUser, error_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                token = void 0;
+                if (req.headers.authorization &&
+                    req.headers.authorization.startsWith('Bearer')) {
+                    token = req.headers.authorization.split(' ')[1];
+                }
+                if (!token) {
+                    return [2 /*return*/, res
+                            .status(401)
+                            .json({ error: 'You are not logged in! please login to gain access.' })];
+                }
+                decoded = jsonwebtoken_1["default"].verify(token, secret);
+                return [4 /*yield*/, store.show(decoded.userId)
+                    //@ts-ignore
+                ];
+            case 1:
+                currentUser = _a.sent();
+                //@ts-ignore
+                req.user = currentUser;
+                next();
+                return [3 /*break*/, 3];
+            case 2:
+                error_1 = _a.sent();
+                res.status(401).json({ message: 'invalid token' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
         }
-        if (!token) {
-            return res
-                .status(401)
-                .json({ error: 'You are not logged in! please login to gain access.' });
-        }
-        var decoded = jsonwebtoken_1["default"].verify(token, secret);
-        next();
-    }
-    catch (error) {
-        console.log(error);
-        res.status(401);
-    }
-};
+    });
+}); };
 exports.verifyAuthToken = verifyAuthToken;
+var roleAuthentication = function () {
+    var role = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        role[_i] = arguments[_i];
+    }
+    return function (req, res, next) {
+        //@ts-ignore
+        if (!role.includes(req.user.roles)) {
+            return res
+                .status(403)
+                .json({ message: 'You do not have permission to perform this action' });
+        }
+        next();
+    };
+};
+exports.roleAuthentication = roleAuthentication;
 var userRoutes = function (app) {
     app.get('/api/users', index);
     app.get('/api/users/:id', show);
     app.post('/api/users', exports.verifyAuthToken, create);
     app.post('/api/login', authenticate);
+    app.put('/api/users/:id', exports.verifyAuthToken, updateMe);
+    app.patch('/api/users/:id', exports.verifyAuthToken, (0, exports.roleAuthentication)('admin'), update);
+    app["delete"]('/api/users/:id', exports.verifyAuthToken, (0, exports.roleAuthentication)('admin'), destroy);
 };
 exports["default"] = userRoutes;

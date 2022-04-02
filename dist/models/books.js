@@ -106,11 +106,11 @@ var BookStore = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, , 4]);
-                        sql = 'SELECT * FROM books WHERE id=($1)';
+                        sql = "SELECT * FROM books WHERE id=".concat(id);
                         return [4 /*yield*/, database_1["default"].connect()];
                     case 1:
                         conn = _a.sent();
-                        return [4 /*yield*/, conn.query(sql, [id])];
+                        return [4 /*yield*/, conn.query(sql)];
                     case 2:
                         result = _a.sent();
                         book = result.rows[0];
@@ -126,23 +126,17 @@ var BookStore = /** @class */ (function () {
     };
     BookStore.prototype.update = function (id, title, author, totalPages, type, summary) {
         return __awaiter(this, void 0, void 0, function () {
-            var sql, conn, result, book, err_4;
+            var sql, values, conn, result, book, err_4;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, , 4]);
-                        sql = 'UPDATE books SET title=($2),author=($3),total_pages=($4),type=($5),summary=($6) WHERE id=($1) RETURNING *';
+                        sql = "UPDATE books SET title = ($1), author = ($2),total_pages = ($3),type = ($4), summary = ($5) WHERE id=".concat(id, " RETURNING *");
+                        values = [title, author, totalPages, type, summary];
                         return [4 /*yield*/, database_1["default"].connect()];
                     case 1:
                         conn = _a.sent();
-                        return [4 /*yield*/, conn.query(sql, [
-                                id,
-                                title,
-                                author,
-                                totalPages,
-                                type,
-                                summary,
-                            ])];
+                        return [4 /*yield*/, conn.query(sql, values)];
                     case 2:
                         result = _a.sent();
                         book = result.rows[0];
@@ -163,11 +157,11 @@ var BookStore = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, , 4]);
-                        sql = 'DELETE FROM books WHERE id=($1) RETURNING *';
+                        sql = "DELETE FROM books WHERE id=".concat(id, " RETURNING *");
                         return [4 /*yield*/, database_1["default"].connect()];
                     case 1:
                         conn = _a.sent();
-                        return [4 /*yield*/, conn.query(sql, [id])];
+                        return [4 /*yield*/, conn.query(sql)];
                     case 2:
                         result = _a.sent();
                         book = result.rows[0];

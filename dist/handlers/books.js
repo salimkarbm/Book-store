@@ -35,16 +35,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 exports.__esModule = true;
-var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var books_1 = require("../models/books");
 var users_1 = require("../handlers/users");
 var store = new books_1.BookStore();
 var create = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var book, secret, books, err_1;
+    var book, books, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -55,13 +51,6 @@ var create = function (req, res) { return __awaiter(void 0, void 0, void 0, func
                     totalPages: req.body.totalPages,
                     summary: req.body.summary
                 };
-                secret = process.env.TOKEN_SECRET;
-                try {
-                    jsonwebtoken_1["default"].verify(req.body.token, secret);
-                }
-                catch (err) {
-                    return [2 /*return*/, res.status(401).json("Invalid token ".concat(err))];
-                }
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, , 4]);
@@ -124,20 +113,21 @@ var update = function (req, res) { return __awaiter(void 0, void 0, void 0, func
                 book = {
                     title: req.body.title,
                     author: req.body.author,
-                    type: req.body.type,
                     totalPages: req.body.totalPages,
+                    type: req.body.type,
                     summary: req.body.summary
                 };
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, store.update(req.params.id, req.body.title, req.body.author, req.body.totalPages, req.body.type, req.body.summary)];
+                return [4 /*yield*/, store.update(req.params.id, book.title, book.author, book.totalPages, book.type, book.summary)];
             case 2:
                 updatedBooks = _a.sent();
                 res.status(200).json(updatedBooks);
                 return [3 /*break*/, 4];
             case 3:
                 err_4 = _a.sent();
+                console.log(err_4);
                 res.status(404).json({ error: err_4 });
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
@@ -145,18 +135,17 @@ var update = function (req, res) { return __awaiter(void 0, void 0, void 0, func
     });
 }); };
 var destroy = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var deletedBook, err_5;
+    var id, deletedBook, err_5;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, store["delete"](req.params.id)];
+                id = req.params.id;
+                return [4 /*yield*/, store["delete"](id)];
             case 1:
                 deletedBook = _a.sent();
-                res
-                    .status(204)
-                    .json({ status: 'success', message: 'Book deleted successfully' });
-                return [3 /*break*/, 3];
+                console.log(deletedBook);
+                return [2 /*return*/, res.status(204)];
             case 2:
                 err_5 = _a.sent();
                 res.status(400).json({ error: err_5 });
