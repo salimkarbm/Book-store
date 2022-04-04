@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 exports.__esModule = true;
-exports.roleAuthentication = exports.verifyAuthToken = void 0;
+exports.verifyAuthToken = void 0;
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var users_1 = require("../models/users");
 var store = new users_1.userStore();
@@ -195,7 +195,7 @@ var authenticate = function (req, res) { return __awaiter(void 0, void 0, void 0
     });
 }); };
 var verifyAuthToken = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var token, decoded, currentUser, error_1;
+    var token, decoded, currentUser, userId, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -211,13 +211,15 @@ var verifyAuthToken = function (req, res, next) { return __awaiter(void 0, void 
                             .json({ error: 'You are not logged in! please login to gain access.' })];
                 }
                 decoded = jsonwebtoken_1["default"].verify(token, secret);
-                return [4 /*yield*/, store.show(decoded.userId)
-                    //@ts-ignore
-                ];
+                return [4 /*yield*/, store.show(decoded.userId)];
             case 1:
                 currentUser = _a.sent();
-                //@ts-ignore
-                req.user = currentUser;
+                userId = parseInt(req.params.id);
+                if (userId !== currentUser.id) {
+                    return [2 /*return*/, res
+                            .status(403)
+                            .json({ message: 'You do not have permission to perform this action' })];
+                }
                 next();
                 return [3 /*break*/, 3];
             case 2:
@@ -229,29 +231,13 @@ var verifyAuthToken = function (req, res, next) { return __awaiter(void 0, void 
     });
 }); };
 exports.verifyAuthToken = verifyAuthToken;
-var roleAuthentication = function () {
-    var role = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        role[_i] = arguments[_i];
-    }
-    return function (req, res, next) {
-        //@ts-ignore
-        if (!role.includes(req.user.roles)) {
-            return res
-                .status(403)
-                .json({ message: 'You do not have permission to perform this action' });
-        }
-        next();
-    };
-};
-exports.roleAuthentication = roleAuthentication;
 var userRoutes = function (app) {
     app.get('/api/users', index);
     app.get('/api/users/:id', show);
-    app.post('/api/users', exports.verifyAuthToken, create);
-    app.post('/api/login', authenticate);
-    app.put('/api/users/:id', exports.verifyAuthToken, updateMe);
-    app.patch('/api/users/:id', exports.verifyAuthToken, (0, exports.roleAuthentication)('admin'), update);
-    app["delete"]('/api/users/:id', exports.verifyAuthToken, (0, exports.roleAuthentication)('admin'), destroy);
+    app.post('/api/users', create);
+    app.post('/api/login', exports.verifyAuthToken, authenticate);
+    app.patch('/api/users/:id', exports.verifyAuthToken, updateMe);
+    app.put('/api/users/:id', exports.verifyAuthToken, update);
+    app["delete"]('/api/users/:id', exports.verifyAuthToken, destroy);
 };
 exports["default"] = userRoutes;

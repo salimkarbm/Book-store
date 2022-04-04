@@ -1,4 +1,3 @@
-import { promisify } from 'util'
 import express, { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import { User, userStore } from '../models/users'
@@ -56,7 +55,6 @@ const updateMe = async (req: Request, res: Response) => {
     res.status(404).json({ error: err })
   }
 }
-
 const destroy = async (req: Request, res: Response) => {
   try {
     const deletedBook = await store.delete(req.params.id)
@@ -109,45 +107,26 @@ export const verifyAuthToken = async (
     }
     const decoded = jwt.verify(token, secret) as unknown as myToken
     const currentUser = await store.show(decoded.userId)
-
-    //@ts-ignore
-    req.user = currentUser
+    const userId = parseInt(req.params.id)
+    if (userId !== currentUser.id) {
+      return res
+        .status(403)
+        .json({ message: 'You do not have permission to perform this action' })
+    }
     next()
   } catch (error) {
     res.status(401).json({ message: 'invalid token' })
   }
 }
 
-export const roleAuthentication = (...role: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    //@ts-ignore
-    if (!role.includes(req.user.roles)) {
-      return res
-        .status(403)
-        .json({ message: 'You do not have permission to perform this action' })
-    }
-    next()
-  }
-}
-
 const userRoutes = (app: express.Application) => {
   app.get('/api/users', index)
   app.get('/api/users/:id', show)
-  app.post('/api/users', verifyAuthToken, create)
-  app.post('/api/login', authenticate)
-  app.put('/api/users/:id', verifyAuthToken, updateMe)
-  app.patch(
-    '/api/users/:id',
-    verifyAuthToken,
-    roleAuthentication('admin'),
-    update
-  )
-  app.delete(
-    '/api/users/:id',
-    verifyAuthToken,
-    roleAuthentication('admin'),
-    destroy
-  )
+  app.post('/api/users', create)
+  app.post('/api/login', verifyAuthToken, authenticate)
+  app.patch('/api/users/:id', verifyAuthToken, updateMe)
+  app.put('/api/users/:id', verifyAuthToken, update)
+  app.delete('/api/users/:id', verifyAuthToken, destroy)
 }
 
 export default userRoutes

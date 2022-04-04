@@ -35,32 +35,48 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 exports.__esModule = true;
-var express_1 = __importDefault(require("express"));
-var books_1 = __importDefault(require("./handlers/books"));
-var users_1 = __importDefault(require("./handlers/users"));
-var orders_1 = __importDefault(require("./handlers/orders"));
-var products_1 = __importDefault(require("./handlers/products"));
-var dashboard_1 = __importDefault(require("./handlers/dashboard"));
-var app = (0, express_1["default"])();
-var address = '0.0.0.0:5000';
-app.use(express_1["default"].json());
-app.get('/', function (req, res) {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            res.send('hello world');
-            return [2 /*return*/];
-        });
+var dashboard_1 = require("../services/dashboard");
+var dashboard = new dashboard_1.DashboardQueries();
+var productsInOrders = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var products;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, dashboard.productsInOrders()];
+            case 1:
+                products = _a.sent();
+                res.status(200).json(products);
+                return [2 /*return*/];
+        }
     });
-});
-(0, books_1["default"])(app);
-(0, users_1["default"])(app);
-(0, orders_1["default"])(app);
-(0, products_1["default"])(app);
-(0, dashboard_1["default"])(app);
-app.listen(5000, function () {
-    console.log("starting app on: ".concat(address));
-});
+}); };
+var usersWithOrders = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var users;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, dashboard.usersWithOrders()];
+            case 1:
+                users = _a.sent();
+                res.status(200).json(users);
+                return [2 /*return*/];
+        }
+    });
+}); };
+var top5Products = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var mostExpensiveProducts;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, dashboard.top5Products()];
+            case 1:
+                mostExpensiveProducts = _a.sent();
+                res.status(200).json(mostExpensiveProducts);
+                return [2 /*return*/];
+        }
+    });
+}); };
+var dashboardRoutes = function (app) {
+    app.get('/api/products-in-orders', productsInOrders);
+    app.get('/api/users-with-orders', usersWithOrders);
+    app.get('/api/top-5-products', top5Products);
+};
+exports["default"] = dashboardRoutes;
